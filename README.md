@@ -35,6 +35,6 @@ Espresso testing is only used for click on RecyclerView's item at position 0 and
     
  <b>Screenshots</br>   
  
- <img src="yummio_phone_ui0" alt="Yummio Phone Screenshot">
- <img src="yummio_phone_ui1" alt="Yummio Phone Screenshot">
- <img src="yummio_phone_ui2" alt="Yummio Phone Screenshot">
+ <img src="https://raw.githubusercontent.com/akndmr/Yummio/master/yummio_phone_ui0.PNG" alt="Yummio Phone Screenshot">
+ <img src="https://raw.githubusercontent.com/akndmr/Yummio/master/yummio_phone_ui1.PNG" alt="Yummio Phone Screenshot">
+ <img src="https://raw.githubusercontent.com/akndmr/Yummio/master/yummio_phone_ui2.PNG" alt="Yummio Phone Screenshot">
