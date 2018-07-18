@@ -104,7 +104,7 @@ public class RecipeAdapter extends RecyclerView.Adapter<RecipeAdapter.RecipeView
     }
 
     // Get selected Recipe as Json String
-    public String jsonToString(String jsonResult, int position){
+    private String jsonToString(String jsonResult, int position){
         JsonElement jsonElement = new JsonParser().parse(jsonResult);
         JsonArray jsonArray = jsonElement.getAsJsonArray();
         JsonElement recipeElement = jsonArray.get(position);
