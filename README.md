@@ -41,3 +41,6 @@ Espresso testing is only used for click on RecyclerView's item at position 0 and
  
  Tablet:</br>
  <img src="https://raw.githubusercontent.com/akndmr/Yummio/master/yummio_tablet_ui2.PNG" alt="Yummio Tablet Screenshot">
+ </br>
+ 
+Developed by Akın DEMİR for Udacity Android Nanodegree
