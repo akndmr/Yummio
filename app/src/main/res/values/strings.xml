@@ -12,4 +12,5 @@
     <string name="kilogram_icon">Kilogram icon</string>
     <string name="checked_icon">Checked icon</string>
     <string name="recipe_icon">Recipe icon</string>
+    <string name="cooking_is_over">Cooking is over!</string>
 </resources>

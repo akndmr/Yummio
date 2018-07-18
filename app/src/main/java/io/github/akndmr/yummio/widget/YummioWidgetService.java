@@ -66,7 +66,6 @@ public class YummioWidgetService extends IntentService {
             stringBuilder.append( line + "\n");
         }
         String ingredientsString = stringBuilder.toString();
-        Log.d("YOYOYO", ingredientsString);
         AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(this);
         int[] appWidgetIds = appWidgetManager.getAppWidgetIds(new ComponentName(this, YummioWidgetProvider.class));
         YummioWidgetProvider.updateWidgetRecipe(this, ingredientsString, imgResId, appWidgetManager, appWidgetIds);

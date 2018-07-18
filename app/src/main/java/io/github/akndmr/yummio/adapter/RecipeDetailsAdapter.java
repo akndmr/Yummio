@@ -82,13 +82,11 @@ public class RecipeDetailsAdapter extends RecyclerView.Adapter<RecipeDetailsAdap
         holder.ingredientRowNumber.setText(String.valueOf(position+1));
 
         String measure = ingredient.getMeasure();
-        Log.d("UNIT_NO MEASURE: ", String.valueOf(measure));
         int unitNo = 0;
 
         for(int i=0; i < ConstantsUtil.units.length; i++){
             if(measure.equals(ConstantsUtil.units[i])){
                 unitNo = i;
-                Log.d("UNIT_NO FOR: ", String.valueOf(unitNo));
                 break;
             }
         }

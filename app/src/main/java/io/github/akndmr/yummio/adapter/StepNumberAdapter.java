@@ -71,7 +71,6 @@ public class StepNumberAdapter extends RecyclerView.Adapter<StepNumberAdapter.St
                 mOnStepClick.onStepClick(holder.getAdapterPosition());
                 rowNo = holder.getAdapterPosition();
                 notifyDataSetChanged();
-                Toast.makeText(mContext,"TIKLANDI", Toast.LENGTH_SHORT).show();
             }
         });
 

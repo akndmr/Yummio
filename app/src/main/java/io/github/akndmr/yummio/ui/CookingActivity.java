@@ -29,6 +29,7 @@ public class CookingActivity extends AppCompatActivity implements StepperIndicat
         , StepNumberAdapter.OnStepClick {
 
     public static final String STEP_NUMBER_STATE = "step_number_state";
+    public static final String STEP_LIST_STATE = "step_list_state";
 
     @BindView(R.id.fl_player_container)
     FrameLayout mFragmentContainer;
@@ -98,6 +99,8 @@ public class CookingActivity extends AppCompatActivity implements StepperIndicat
 
         if(savedInstanceState != null){
             int stepNo = savedInstanceState.getInt(STEP_NUMBER_STATE,0);
+            if(mStepArrayList.isEmpty())
+                mStepArrayList = savedInstanceState.getParcelableArrayList(STEP_LIST_STATE);
             if(!isTablet){
                 mStepperIndicator.setCurrentStep(stepNo);
             }
@@ -107,7 +110,7 @@ public class CookingActivity extends AppCompatActivity implements StepperIndicat
             playVideo(mVideoNumber);
         }
 
-
+        //Save the recipe info
         SharedPreferences.Editor editor = getSharedPreferences(ConstantsUtil.YUMMIO_SHARED_PREF, MODE_PRIVATE).edit();
         editor.putString(ConstantsUtil.JSON_RESULT_EXTRA, mJsonResult);
         editor.apply();
@@ -121,7 +124,7 @@ public class CookingActivity extends AppCompatActivity implements StepperIndicat
         if(mVideoNumber == mStepArrayList.size()-1){
             //mVideoNumber = step;
             mStepperIndicator.setCurrentStep(step);
-            Toast.makeText(this, "Cooking is over!", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, R.string.cooking_is_over, Toast.LENGTH_LONG).show();
         }
         else{
             mVideoNumber = step;
@@ -134,7 +137,7 @@ public class CookingActivity extends AppCompatActivity implements StepperIndicat
     public void onClick(View v) {
         if(mVideoNumber == mStepArrayList.size()-1){
             mStepperIndicator.setCurrentStep(mVideoNumber);
-            Toast.makeText(this, "Cooking is over!", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, R.string.cooking_is_over, Toast.LENGTH_LONG).show();
         }
        /* else if(mVideoNumber == 0){
             mStepperIndicator.setCurrentStep(mVideoNumber);
@@ -176,6 +179,7 @@ public class CookingActivity extends AppCompatActivity implements StepperIndicat
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
+        outState.putParcelableArrayList(STEP_LIST_STATE,mStepArrayList);
         outState.putInt(STEP_NUMBER_STATE, mVideoNumber);
     }
 

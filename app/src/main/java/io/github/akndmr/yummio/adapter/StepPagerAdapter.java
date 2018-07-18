@@ -33,8 +33,6 @@ public class StepPagerAdapter extends FragmentPagerAdapter {
         videoPlayerFragment.setArguments(stepsBundle);
        // return VideoPlayerFragment.newInstance(position + 1, position == getCount() - 1, mStepList);
 
-
-        Log.d("KONTROL", "StepPager - getItem(" + String.valueOf(position)+ ")");
         return videoPlayerFragment;
     }
 

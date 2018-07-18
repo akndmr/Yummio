@@ -139,7 +139,6 @@ public class VideoPlayerFragment extends Fragment {
 
     public void initializeVideoPlayer(Uri videoUri){
         if(mSimpleExoPlayer == null){
-            Log.d("KONTROL", "initializeVideoPlayer()");
             // 1. Create a default TrackSelector
             bandwidthMeter = new DefaultBandwidthMeter();
             videoTrackSelectionFactory =
@@ -169,7 +168,6 @@ public class VideoPlayerFragment extends Fragment {
     // Release player
     private void releasePlayer() {
         if (mSimpleExoPlayer != null) {
-            Log.d("KONTROL", "releasePlayer()");
             mSimpleExoPlayer.stop();
             mSimpleExoPlayer.release();
             mSimpleExoPlayer = null;
