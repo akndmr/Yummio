@@ -1,3 +1,5 @@
+<a href="https://medium.com/@akndmr/nightmare-project-baking-app-c37eafee8013">Here</a>, I wrote a step by step guide on how to create Baking App easily.
+
 <b>Project Overview</b></br>
 You will productionize an app, taking it from a functional state to a production-ready state. This will involve finding and handling error cases, adding accessibility features, allowing for localization, adding a widget, and adding a library.
 
