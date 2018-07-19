@@ -20,8 +20,7 @@ In this project you will:
 -<a href="https://github.com/square/retrofit">Retrofit </a>  
 -<a href="https://github.com/square/picasso">Picasso </a>  
 -<a href="https://developer.android.com/training/testing/espresso/">Espresso </a>  
--<a href="https://github.com/JakeWharton/butterknife">ButterKnife </a>  
--<a href="https://github.com/badoualy/stepper-indicator">Stepper Indicator</a>
+-<a href="https://github.com/JakeWharton/butterknife">ButterKnife </a> 
 
 <b>Espresso Testing</b></br>
 Espresso testing is only used for click on RecyclerView's item at position 0 and intent(RecipeActivity to RecipeDetailsActivity)
