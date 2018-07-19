@@ -1,13 +1,12 @@
 package io.github.akndmr.yummio.widget;
 
-import android.app.IntentService;
 import android.appwidget.AppWidgetManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.support.annotation.Nullable;
-import android.util.Log;
+import android.support.annotation.NonNull;
+import android.support.v4.app.JobIntentService;
 
 import com.google.gson.Gson;
 
@@ -20,26 +19,18 @@ import io.github.akndmr.yummio.utils.ConstantsUtil;
 /**
  * Created by Akın DEMİR on 12.07.2018.
  */
-public class YummioWidgetService extends IntentService {
+public class YummioWidgetService extends JobIntentService {
 
     public static final String ACTION_OPEN_RECIPE =
             "io.github.akndmr.yummio.widget.yummio_widget_service";
 
-    /**
-     * Creates an IntentService.  Invoked by your subclass's constructor.
-     *
-     * @param name Used to name the worker thread, important only for debugging.
-     */
-    public YummioWidgetService(String name) {
-        super(name);
-    }
 
     public YummioWidgetService() {
-        super("YummioWidgetService");
+        super();
     }
 
     @Override
-    protected void onHandleIntent(@Nullable Intent intent) {
+    protected void onHandleWork(@NonNull Intent intent) {
         if (intent != null) {
             final String action = intent.getAction();
             if (ACTION_OPEN_RECIPE.equals(action)) {

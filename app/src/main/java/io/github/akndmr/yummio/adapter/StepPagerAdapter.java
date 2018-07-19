@@ -4,7 +4,6 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
-import android.util.Log;
 
 import java.util.ArrayList;
 
@@ -31,7 +30,6 @@ public class StepPagerAdapter extends FragmentPagerAdapter {
         stepsBundle.putInt("page",position+1);
         stepsBundle.putBoolean("isLastPage",position == getCount() - 1);
         videoPlayerFragment.setArguments(stepsBundle);
-       // return VideoPlayerFragment.newInstance(position + 1, position == getCount() - 1, mStepList);
 
         return videoPlayerFragment;
     }

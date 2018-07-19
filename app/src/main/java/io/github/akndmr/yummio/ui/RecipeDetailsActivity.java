@@ -2,11 +2,13 @@ package io.github.akndmr.yummio.ui;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.support.v4.app.NavUtils;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 
@@ -26,6 +28,9 @@ import io.github.akndmr.yummio.utils.ConstantsUtil;
 
 public class RecipeDetailsActivity extends AppCompatActivity {
 
+    public static final String RECIPE_LIST_STATE = "recipe_details_list";
+    public static final String RECIPE_JSON_STATE = "recipe_json_list";
+
     @BindView(R.id.rv_recipe_ingredients)
     RecyclerView mRecyclerView;
 
@@ -36,6 +41,7 @@ public class RecipeDetailsActivity extends AppCompatActivity {
     ArrayList<Recipe> mRecipeArrayList;
     ArrayList<Step> mStepArrayList;
     String mJsonResult;
+    List<Ingredient> mIngredientList;
 
     private boolean isTablet;
 
@@ -45,6 +51,8 @@ public class RecipeDetailsActivity extends AppCompatActivity {
         setContentView(R.layout.activity_recipe_details);
         ButterKnife.bind(this);
 
+        // Up navigation
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         if(findViewById(R.id.recipe_details_tablet) != null){
             isTablet = true;
@@ -64,17 +72,27 @@ public class RecipeDetailsActivity extends AppCompatActivity {
             Recipe recipe = gson.fromJson(jsonRecipe, Recipe.class);
 
             mStepArrayList = (ArrayList<Step>) recipe.getSteps();
-            List<Ingredient> mIngredients = recipe.getIngredients();
-            mRecipeDetailsAdapter = new RecipeDetailsAdapter(this, mIngredients);
+            mIngredientList = recipe.getIngredients();
         }
         else{
 
-            // Get recipe from intent extra
-            Intent recipeIntent = getIntent();
-            mRecipeArrayList = recipeIntent.getParcelableArrayListExtra(ConstantsUtil.RECIPE_INTENT_EXTRA);
-            mJsonResult = recipeIntent.getStringExtra(ConstantsUtil.JSON_RESULT_EXTRA);
-            mStepArrayList = (ArrayList<Step>) mRecipeArrayList.get(0).getSteps();
-            List<Ingredient> mIngredientList = mRecipeArrayList.get(0).getIngredients();
+            // Check if state saved
+            if(savedInstanceState != null)
+            {
+                mRecipeArrayList = savedInstanceState.getParcelableArrayList(RECIPE_LIST_STATE);
+                mJsonResult = savedInstanceState.getString(RECIPE_JSON_STATE);
+                mStepArrayList = (ArrayList<Step>) mRecipeArrayList.get(0).getSteps();
+                mIngredientList = mRecipeArrayList.get(0).getIngredients();
+            }
+            else{
+                // Get recipe from intent extra
+                Intent recipeIntent = getIntent();
+                mRecipeArrayList = recipeIntent.getParcelableArrayListExtra(ConstantsUtil.RECIPE_INTENT_EXTRA);
+                mJsonResult = recipeIntent.getStringExtra(ConstantsUtil.JSON_RESULT_EXTRA);
+                mStepArrayList = (ArrayList<Step>) mRecipeArrayList.get(0).getSteps();
+                mIngredientList = mRecipeArrayList.get(0).getIngredients();
+            }
+
             mRecipeDetailsAdapter = new RecipeDetailsAdapter(this, mIngredientList);
 
         }
@@ -100,5 +118,23 @@ public class RecipeDetailsActivity extends AppCompatActivity {
             }
         });
 
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            // Respond to the action bar's Up/Home button
+            case android.R.id.home:
+                NavUtils.navigateUpFromSameTask(this);
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putParcelableArrayList(RECIPE_LIST_STATE, mRecipeArrayList);
+        outState.putString(RECIPE_JSON_STATE, mJsonResult);
     }
 }

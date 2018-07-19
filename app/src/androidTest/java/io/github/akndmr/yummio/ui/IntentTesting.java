@@ -1,4 +1,4 @@
-package io.github.akndmr.yummio;
+package io.github.akndmr.yummio.ui;
 
 import android.app.Activity;
 import android.app.Instrumentation;
@@ -10,8 +10,11 @@ import android.support.test.rule.ActivityTestRule;
 import android.support.test.runner.AndroidJUnit4;
 
 import static android.support.test.espresso.Espresso.onView;
+import static android.support.test.espresso.action.ViewActions.click;
 import static android.support.test.espresso.intent.Intents.intended;
+import static android.support.test.espresso.intent.matcher.IntentMatchers.hasComponent;
 import static android.support.test.espresso.intent.matcher.IntentMatchers.hasExtraWithKey;
+import static android.support.test.espresso.matcher.ViewMatchers.withId;
 import static org.hamcrest.Matchers.not;
 
 import org.junit.Before;
@@ -19,6 +22,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import io.github.akndmr.yummio.R;
 import io.github.akndmr.yummio.ui.RecipeActivity;
 import io.github.akndmr.yummio.utils.ConstantsUtil;
 
@@ -56,10 +60,27 @@ public class IntentTesting {
 
     @Test
     public void intentTest(){
-        //Recyclerview click action
-        onView(ViewMatchers.withId(R.id.rv_recipes)).perform(RecyclerViewActions.actionOnItemAtPosition(0,ViewActions.click()));
+
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        //Recyclerview scroll to position
+        onView(ViewMatchers.withId(R.id.rv_recipes)).perform(RecyclerViewActions.scrollToPosition(4));
+
+        //Perform Recyclerview click on item at position
+        onView(withId(R.id.rv_recipes)).perform(RecyclerViewActions.actionOnItemAtPosition(0, click()));
 
         //Check if intent (RecipeActivity to RecipeDetailsActivity) has RECIPE_INTENT_EXTRA
         intended(hasExtraWithKey(ConstantsUtil.RECIPE_INTENT_EXTRA));
+
+        //Perform click action on start cooking button
+        onView(withId(R.id.btn_start_cooking)).perform(ViewActions.click());
+
+        //Check if intent (RecipeDetailsActivity to CookingActivity) has RECIPE_INTENT_EXTRA
+        intended(hasComponent(CookingActivity.class.getName()));
     }
+
 }

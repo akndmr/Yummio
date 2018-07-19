@@ -1,7 +1,6 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:tools="http://schemas.android.com/tools"
     android:padding="@dimen/widget_margin"
     android:background="@color/colorWidgetBackground">
 
@@ -28,6 +27,6 @@
         android:textAllCaps="false"
         android:textColor="#ffffff"
         android:textSize="12sp"
-        tools:text="Ingredients" />
+        android:text="@string/you_will_ingredients_of_latest_recipe_you_open_here"/>
 
 </RelativeLayout>

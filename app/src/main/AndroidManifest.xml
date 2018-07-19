@@ -3,6 +3,8 @@
     package="io.github.akndmr.yummio">
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <!-- For Android M+ to use JobIntentService-->
+    <uses-permission android:name="android.permission.WAKE_LOCK"/>
 
     <application
         android:allowBackup="true"
@@ -11,7 +13,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".ui.RecipeActivity">
+        <activity android:name=".ui.RecipeActivity" android:launchMode="singleTop">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -20,8 +22,16 @@
         </activity>
         <activity
             android:name=".ui.RecipeDetailsActivity"
-            android:label="Ingredients" />
-        <activity android:name=".ui.CookingActivity" />
+            android:label="Ingredients" android:launchMode="singleTop">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".ui.RecipeActivity" />
+        </activity>
+        <activity android:name=".ui.CookingActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".ui.RecipeDetailsActivity" />
+        </activity>
 
         <service android:name=".widget.YummioWidgetService" />
 

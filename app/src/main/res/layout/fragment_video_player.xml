@@ -47,13 +47,13 @@
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
         android:ems="10"
-        tools:text="Description"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/player_view"
-        app:layout_constraintVertical_bias="0.0" />
+        app:layout_constraintVertical_bias="0.0"
+        tools:text="Description" />
 
     <ImageView
         android:id="@+id/iv_video_placeholder"
@@ -63,12 +63,13 @@
         android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
-        android:src="@drawable/placeholder"
         android:contentDescription="@string/placeholder_image"
+        android:src="@drawable/placeholder"
         android:visibility="gone"
-        app:layout_constraintBottom_toTopOf="@+id/tv_step_description"
+        app:layout_constraintBottom_toBottomOf="@+id/player_view"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/tv_step_title" />
+
 
 </android.support.constraint.ConstraintLayout>

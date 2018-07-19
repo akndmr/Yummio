@@ -8,7 +8,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import java.util.ArrayList;
 
@@ -25,12 +24,13 @@ public class StepNumberAdapter extends RecyclerView.Adapter<StepNumberAdapter.St
     private final Context mContext;
     private final ArrayList<Step> mStepArrayList;
     public OnStepClick mOnStepClick;
-    private int rowNo = -1;
+    private int rowNo = 0;
 
-    public StepNumberAdapter(Context context, ArrayList<Step> stepArrayList, OnStepClick onStepClick) {
+    public StepNumberAdapter(Context context, ArrayList<Step> stepArrayList, OnStepClick onStepClick, int rowNo) {
         this.mContext = context;
         this.mStepArrayList = stepArrayList;
         this.mOnStepClick = onStepClick;
+        this.rowNo = rowNo;
     }
 
     public class StepNumberHolder extends RecyclerView.ViewHolder {
@@ -77,9 +77,9 @@ public class StepNumberAdapter extends RecyclerView.Adapter<StepNumberAdapter.St
         if(rowNo == position){
             holder.itemView.setBackgroundColor(mContext.getResources().getColor(R.color.colorPrimary));
         }
-        else if(position == 0){
+       /* else if(position == 0){
             holder.itemView.setBackgroundColor(mContext.getResources().getColor(R.color.colorPrimary));
-        }
+        }*/
         else
         {
             holder.itemView.setBackgroundColor(mContext.getResources().getColor(R.color.colorPrimaryLight));

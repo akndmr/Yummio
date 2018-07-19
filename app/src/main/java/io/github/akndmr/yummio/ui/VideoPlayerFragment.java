@@ -6,9 +6,9 @@ import android.media.ThumbnailUtils;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -40,7 +40,12 @@ import io.github.akndmr.yummio.utils.ConstantsUtil;
 /**
  * A simple {@link Fragment} subclass.
  */
-public class VideoPlayerFragment extends Fragment {
+public class VideoPlayerFragment extends Fragment{
+
+    public static final String STEP_LIST =  "step_list_fragment";
+    public static final String STEP_NUMBER =  "step_number";
+    public static final String STEP_LIST_ARGS =  "step_list_fragment_args";
+    public static final String STEP_NUMBER_ARGS =  "step_number_args";
 
     @BindView(R.id.tv_step_title)
     TextView mStepTitle;
@@ -61,19 +66,17 @@ public class VideoPlayerFragment extends Fragment {
     DataSource.Factory dataSourceFactory;
     MediaSource videoSource;
 
-    String url = "https://d17h27t6h515a5.cloudfront.net/topher/2017/April/58ffd974_-intro-creampie/-intro-creampie.mp4";
-    Uri mp4VideoUri = Uri.parse(url);
 
     ArrayList<Step> mStepArrayList = new ArrayList<>();
-    int stepNo = 0;
     Uri mVideoUri;
     String mVideoThumbnail, mVideoDescription;
     Bitmap mVideoThumbnailImage;
+    int mVideoNumber;
+
 
     public VideoPlayerFragment() {
         // Required empty public constructor
     }
-
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -81,63 +84,59 @@ public class VideoPlayerFragment extends Fragment {
         // Inflate the layout for this fragment
         View root = inflater.inflate(R.layout.fragment_video_player, container, false);
         ButterKnife.bind(this, root);
-        if(getArguments() != null){
 
-            mImageViewPlaceholder.setVisibility(View.GONE);
-            mPlayerView.setVisibility(View.VISIBLE);
 
-            if(getArguments().getString(ConstantsUtil.STEP_VIDEO_URI).equals("")){
-                if(getArguments().getString(ConstantsUtil.STEP_THUMBNAIL_URI).equals(""))
-                {
-                    // If no video or thumbnail, use placeholder image
-                    mPlayerView.setUseArtwork(true);
-                    mImageViewPlaceholder.setVisibility(View.VISIBLE);
-                    mPlayerView.setUseController(false);
-
-                    /*
-                    --Not working--
-                    Bitmap placeHolder = BitmapFactory.decodeResource(getResources(),R.drawable.placeholder);
-                    mPlayerView.setDefaultArtwork(placeHolder);*/
-                }
-                else{
-                    mImageViewPlaceholder.setVisibility(View.GONE);
-                    mPlayerView.setVisibility(View.VISIBLE);
-                    mVideoThumbnail = getArguments().getString(ConstantsUtil.STEP_THUMBNAIL_URI);
-                    mVideoThumbnailImage = ThumbnailUtils.createVideoThumbnail(mVideoThumbnail, MediaStore.Video.Thumbnails.MICRO_KIND);
-                    mPlayerView.setUseArtwork(true);
-                    mPlayerView.setDefaultArtwork(mVideoThumbnailImage);
-                }
-            }
-            else{
-                mVideoUri = Uri.parse(getArguments().getString(ConstantsUtil.STEP_VIDEO_URI));
-            }
-            mStepDescription.setText(getArguments().getString(ConstantsUtil.STEP_DESCRIPTION));
-            mStepTitle.setText(getArguments().getString(ConstantsUtil.STEP_SHORT_DESCRIPTION));
-            initializeVideoPlayer(mVideoUri);
+        // Check if there is any state saved
+        if(savedInstanceState != null){
+            mStepArrayList = savedInstanceState.getParcelableArrayList(STEP_LIST);
+            mVideoNumber = savedInstanceState.getInt(STEP_NUMBER);
         }
+
+
+        // If there is no saved state getArguments from CookingActivity
+        else{
+           if(getArguments() != null){
+
+               mImageViewPlaceholder.setVisibility(View.GONE);
+               mPlayerView.setVisibility(View.VISIBLE);
+
+               // Get arguments
+               mStepArrayList = getArguments().getParcelableArrayList(ConstantsUtil.STEP_ARRAYLIST);
+               mVideoNumber = getArguments().getInt(ConstantsUtil.STEP_NUMBER);
+
+               if(mStepArrayList.get(mVideoNumber).getVideoURL().equals("")){
+                   if(mStepArrayList.get(mVideoNumber).getThumbnailURL().equals(""))
+                   {
+                       // If no video or thumbnail, use placeholder image
+                       mPlayerView.setUseArtwork(true);
+                       mImageViewPlaceholder.setVisibility(View.VISIBLE);
+                       mPlayerView.setUseController(false);
+                   }
+                   else{
+                       mImageViewPlaceholder.setVisibility(View.GONE);
+                       mPlayerView.setVisibility(View.VISIBLE);
+                       mVideoThumbnail = mStepArrayList.get(mVideoNumber).getThumbnailURL();
+                       mVideoThumbnailImage = ThumbnailUtils.createVideoThumbnail(mVideoThumbnail, MediaStore.Video.Thumbnails.MICRO_KIND);
+                       mPlayerView.setUseArtwork(true);
+                       mPlayerView.setDefaultArtwork(mVideoThumbnailImage);
+                   }
+               }
+               else{
+                   mVideoUri = Uri.parse(mStepArrayList.get(mVideoNumber).getVideoURL());
+               }
+           }
+           // Start player
+           initializeVideoPlayer(mVideoUri);
+       }
         return root;
     }
 
-    @Override
-    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-
-
-    }
-
-
-    public static VideoPlayerFragment newInstance(int page, boolean isLast, ArrayList<Step> stepArrayList) {
-        Bundle args = new Bundle();
-        args.putParcelableArrayList("steps", stepArrayList);
-        args.putInt("page", page);
-        if (isLast)
-            args.putBoolean("isLast", true);
-        final VideoPlayerFragment fragment = new VideoPlayerFragment();
-        fragment.setArguments(args);
-        return fragment;
-    }
 
     public void initializeVideoPlayer(Uri videoUri){
+
+        mStepDescription.setText(mStepArrayList.get(mVideoNumber).getDescription());
+        mStepTitle.setText(mStepArrayList.get(mVideoNumber).getShortDescription());
+
         if(mSimpleExoPlayer == null){
             // 1. Create a default TrackSelector
             bandwidthMeter = new DefaultBandwidthMeter();
@@ -181,7 +180,7 @@ public class VideoPlayerFragment extends Fragment {
     public void onStart() {
         super.onStart();
         if (Util.SDK_INT > 23) {
-            initializeVideoPlayer(mp4VideoUri);
+            initializeVideoPlayer(mVideoUri);
         }
     }
 
@@ -189,7 +188,7 @@ public class VideoPlayerFragment extends Fragment {
     public void onResume() {
         super.onResume();
         if (Util.SDK_INT <= 23 || mSimpleExoPlayer == null) {
-            initializeVideoPlayer(mp4VideoUri);
+            initializeVideoPlayer(mVideoUri);
         }
     }
 
@@ -221,5 +220,12 @@ public class VideoPlayerFragment extends Fragment {
     public void onDestroyView() {
         super.onDestroyView();
         releasePlayer();
+    }
+
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putParcelableArrayList(STEP_LIST, mStepArrayList);
+        outState.putInt(STEP_NUMBER, mVideoNumber);
     }
 }

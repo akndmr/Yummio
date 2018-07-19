@@ -8,7 +8,7 @@ import android.content.Intent;
 import android.widget.RemoteViews;
 
 import io.github.akndmr.yummio.R;
-import io.github.akndmr.yummio.ui.RecipeActivity;
+import io.github.akndmr.yummio.ui.RecipeDetailsActivity;
 import io.github.akndmr.yummio.utils.ConstantsUtil;
 
 /**
@@ -21,7 +21,7 @@ public class YummioWidgetProvider extends AppWidgetProvider {
 
         RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.yummio_widget_provider);
 
-        Intent intent = new Intent(context, RecipeActivity.class);
+        Intent intent = new Intent(context, RecipeDetailsActivity.class);
         intent.putExtra(ConstantsUtil.WIDGET_EXTRA,"CAME_FROM_WIDGET");
         PendingIntent pendingIntent = PendingIntent.getActivity(context,0,intent,0);
 

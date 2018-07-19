@@ -2,10 +2,10 @@ package io.github.akndmr.yummio.adapter;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -24,6 +24,9 @@ import io.github.akndmr.yummio.R;
 import io.github.akndmr.yummio.model.Recipe;
 import io.github.akndmr.yummio.ui.RecipeDetailsActivity;
 import io.github.akndmr.yummio.utils.ConstantsUtil;
+import io.github.akndmr.yummio.widget.YummioWidgetService;
+
+import static android.content.Context.MODE_PRIVATE;
 
 /**
  * Created by Akın DEMİR on 20.06.2018.
@@ -93,6 +96,14 @@ public class RecipeAdapter extends RecyclerView.Adapter<RecipeAdapter.RecipeView
                 intent.putParcelableArrayListExtra(ConstantsUtil.RECIPE_INTENT_EXTRA, recipeArrayList);
                 intent.putExtra(ConstantsUtil.JSON_RESULT_EXTRA, recipeJson);
                 mContext.startActivity(intent);
+
+                //Save the selected recipe info
+                SharedPreferences.Editor editor = mContext.getSharedPreferences(ConstantsUtil.YUMMIO_SHARED_PREF, MODE_PRIVATE).edit();
+                editor.putString(ConstantsUtil.JSON_RESULT_EXTRA, recipeJson);
+                editor.apply();
+
+                //Start the widget service to update the widget
+                YummioWidgetService.startActionOpenRecipe(mContext);
             }
         });
 

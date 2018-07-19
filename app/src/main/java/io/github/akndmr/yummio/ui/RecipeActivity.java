@@ -1,6 +1,7 @@
 package io.github.akndmr.yummio.ui;
 
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
@@ -24,7 +25,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class RecipeActivity extends AppCompatActivity {
+public class RecipeActivity extends AppCompatActivity{
 
     private final String TAG = RecipeActivity.class.getSimpleName();
     RecipeService mRecipeService;
@@ -54,7 +55,16 @@ public class RecipeActivity extends AppCompatActivity {
         }
 
         mRecipeService = new RecipeClient().mRecipeService;
-        fetchRecipes();
+        new FetchRecipesAsync().execute();
+    }
+
+
+    private class FetchRecipesAsync extends AsyncTask<Void,Void,Void>{
+        @Override
+        protected Void doInBackground(Void... voids) {
+            fetchRecipes();
+            return null;
+        }
     }
 
     // Fetch recipes
