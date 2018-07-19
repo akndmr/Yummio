@@ -25,14 +25,32 @@ In this project you will:
 <b>Espresso Testing</b></br>
 Espresso testing is only used for click on RecyclerView's item at position 0 and intent(RecipeActivity to RecipeDetailsActivity)
 
-    @Test
-    public void intentTest(){
-        //Recyclerview click action
-        onView(ViewMatchers.withId(R.id.rv_recipes)).perform(RecyclerViewActions.actionOnItemAtPosition(0,ViewActions.click()));
-
-        //Check if intent (RecipeActivity to RecipeDetailsActivity) has RECIPE_INTENT_EXTRA
-        intended(hasExtraWithKey(ConstantsUtil.RECIPE_INTENT_EXTRA));
+```
+@Test
+public void intentTest(){
+    // Let the UI load completely first
+    try {
+        Thread.sleep(1000);
+    } catch (InterruptedException e) {
+        e.printStackTrace();
     }
+
+    //Recyclerview scroll to position
+    onView(ViewMatchers.withId(R.id.rv_recipes)).perform(RecyclerViewActions.scrollToPosition(4));
+
+    //Perform Recyclerview click on item at position
+    onView(withId(R.id.rv_recipes)).perform(RecyclerViewActions.actionOnItemAtPosition(0, click()));
+
+    //Check if intent (RecipeActivity to RecipeDetailsActivity) has RECIPE_INTENT_EXTRA
+    intended(hasExtraWithKey(ConstantsUtil.RECIPE_INTENT_EXTRA));
+
+    //Perform click action on start cooking button
+    onView(withId(R.id.btn_start_cooking)).perform(ViewActions.click());
+
+    //Check if intent (RecipeDetailsActivity to CookingActivity) has RECIPE_INTENT_EXTRA
+    intended(hasComponent(CookingActivity.class.getName()));
+    }
+```    
     
  <b>Screenshots</b></br>   
  Phone:</br>
