@@ -28,9 +28,14 @@ import retrofit2.Response;
 public class RecipeActivity extends AppCompatActivity{
 
     private final String TAG = RecipeActivity.class.getSimpleName();
+    public static final String RECIPE_JSON_STATE = "recipe_json_state";
+    public static final String RECIPE_ARRAYLIST_STATE = "recipe_arraylist_state";
+
     RecipeService mRecipeService;
     RecipeAdapter recipeAdapter;
     String mJsonResult;
+    ArrayList<Recipe> mRecipeArrayList = new ArrayList<>();
+
     @BindView(R.id.rv_recipes) RecyclerView mRecyclerViewRecipes;
 
     private boolean isTablet;
@@ -39,11 +44,6 @@ public class RecipeActivity extends AppCompatActivity{
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        if(getIntent().getStringExtra(ConstantsUtil.WIDGET_EXTRA) != null){
-            Intent intent = new Intent(this, RecipeDetailsActivity.class);
-            intent.putExtra(ConstantsUtil.WIDGET_EXTRA, "CAME_FROM_WIDGET");
-            startActivity(intent);
-        }
         setContentView(R.layout.activity_recipe);
         ButterKnife.bind(this);
 
@@ -54,8 +54,26 @@ public class RecipeActivity extends AppCompatActivity{
             isTablet = false;
         }
 
-        mRecipeService = new RecipeClient().mRecipeService;
-        new FetchRecipesAsync().execute();
+        if(savedInstanceState != null){
+            mJsonResult = savedInstanceState.getString(RECIPE_JSON_STATE);
+            mRecipeArrayList = savedInstanceState.getParcelableArrayList(RECIPE_ARRAYLIST_STATE);
+            recipeAdapter = new RecipeAdapter(RecipeActivity.this, mRecipeArrayList, mJsonResult);
+            RecyclerView.LayoutManager mLayoutManager;
+            if(isTablet){
+                mLayoutManager = new GridLayoutManager(RecipeActivity.this, 2);
+            }
+            else{
+                mLayoutManager = new LinearLayoutManager(RecipeActivity.this);
+            }
+
+            mRecyclerViewRecipes.setLayoutManager(mLayoutManager);
+            mRecyclerViewRecipes.setAdapter(recipeAdapter);
+        }
+        else{
+            mRecipeService = new RecipeClient().mRecipeService;
+            new FetchRecipesAsync().execute();
+        }
+
     }
 
 
@@ -75,11 +93,11 @@ public class RecipeActivity extends AppCompatActivity{
             @Override
             public void onResponse(Call<ArrayList<Recipe>> call, Response<ArrayList<Recipe>> response) {
 
-                ArrayList<Recipe> recipe = response.body();
+                mRecipeArrayList = response.body();
 
                 mJsonResult = new Gson().toJson(response.body());
 
-                recipeAdapter = new RecipeAdapter(RecipeActivity.this, recipe,mJsonResult);
+                recipeAdapter = new RecipeAdapter(RecipeActivity.this, mRecipeArrayList, mJsonResult);
                 RecyclerView.LayoutManager mLayoutManager;
                 if(isTablet){
                     mLayoutManager = new GridLayoutManager(RecipeActivity.this, 2);
@@ -100,4 +118,10 @@ public class RecipeActivity extends AppCompatActivity{
         });
     }
 
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putString(RECIPE_JSON_STATE, mJsonResult);
+        outState.putParcelableArrayList(RECIPE_ARRAYLIST_STATE, mRecipeArrayList);
+    }
 }

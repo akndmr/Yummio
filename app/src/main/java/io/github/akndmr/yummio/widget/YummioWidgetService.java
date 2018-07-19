@@ -1,5 +1,6 @@
 package io.github.akndmr.yummio.widget;
 
+import android.app.IntentService;
 import android.appwidget.AppWidgetManager;
 import android.content.ComponentName;
 import android.content.Context;
@@ -7,6 +8,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.support.annotation.NonNull;
 import android.support.v4.app.JobIntentService;
+import android.support.v4.content.ContextCompat;
 
 import com.google.gson.Gson;
 
@@ -19,18 +21,22 @@ import io.github.akndmr.yummio.utils.ConstantsUtil;
 /**
  * Created by Akın DEMİR on 12.07.2018.
  */
-public class YummioWidgetService extends JobIntentService {
+public class YummioWidgetService extends IntentService {
 
     public static final String ACTION_OPEN_RECIPE =
             "io.github.akndmr.yummio.widget.yummio_widget_service";
 
 
+    public YummioWidgetService(String name) {
+        super(name);
+    }
+
     public YummioWidgetService() {
-        super();
+        super("YummioWidgetService");
     }
 
     @Override
-    protected void onHandleWork(@NonNull Intent intent) {
+    protected void onHandleIntent(@NonNull Intent intent) {
         if (intent != null) {
             final String action = intent.getAction();
             if (ACTION_OPEN_RECIPE.equals(action)) {
@@ -68,5 +74,12 @@ public class YummioWidgetService extends JobIntentService {
         Intent intent = new Intent(context, YummioWidgetService.class);
         intent.setAction(ACTION_OPEN_RECIPE);
         context.startService(intent);
+    }
+
+    // For Android O and above
+    public static void startActionOpenRecipeO(Context context){
+        Intent intent = new Intent(context, YummioWidgetService.class);
+        intent.setAction(ACTION_OPEN_RECIPE);
+        ContextCompat.startForegroundService(context,intent);
     }
 }

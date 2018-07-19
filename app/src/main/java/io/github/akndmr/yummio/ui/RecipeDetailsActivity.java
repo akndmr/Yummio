@@ -2,6 +2,7 @@ package io.github.akndmr.yummio.ui;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.Build;
 import android.support.v4.app.NavUtils;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -25,6 +26,7 @@ import io.github.akndmr.yummio.model.Ingredient;
 import io.github.akndmr.yummio.model.Recipe;
 import io.github.akndmr.yummio.model.Step;
 import io.github.akndmr.yummio.utils.ConstantsUtil;
+import io.github.akndmr.yummio.widget.YummioWidgetService;
 
 public class RecipeDetailsActivity extends AppCompatActivity {
 
@@ -92,10 +94,10 @@ public class RecipeDetailsActivity extends AppCompatActivity {
                 mStepArrayList = (ArrayList<Step>) mRecipeArrayList.get(0).getSteps();
                 mIngredientList = mRecipeArrayList.get(0).getIngredients();
             }
-
-            mRecipeDetailsAdapter = new RecipeDetailsAdapter(this, mIngredientList);
-
         }
+
+        mRecipeDetailsAdapter = new RecipeDetailsAdapter(this, mIngredientList);
+
         RecyclerView.LayoutManager mLayoutManager;
         if(isTablet){
             mLayoutManager = new GridLayoutManager(this, 2);
@@ -117,7 +119,6 @@ public class RecipeDetailsActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
-
     }
 
     @Override
