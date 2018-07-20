@@ -9,4 +9,5 @@
     <string name="recipe_icon">Recipe icon</string>
     <string name="cooking_is_over">Cooking is over!</string>
     <string name="you_will_ingredients_of_latest_recipe_you_open_here">You will ingredients of latest recipe you open here</string>
+    <string name="you_better_see_next_step">You better see next step!</string>
 </resources>

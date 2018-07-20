@@ -61,6 +61,7 @@ public class IntentTesting {
     @Test
     public void intentTest(){
 
+        // Let the UI load completely first
         try {
             Thread.sleep(1000);
         } catch (InterruptedException e) {

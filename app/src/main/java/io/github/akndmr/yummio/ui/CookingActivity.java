@@ -137,7 +137,10 @@ public class CookingActivity extends AppCompatActivity  implements View.OnClickL
     public void onClick(View v) {
         //If it's last step show cooking is over
         if(mVideoNumber == mStepArrayList.size()-1){
-            Toast.makeText(this, R.string.cooking_is_over, Toast.LENGTH_LONG).show();
+            Toast.makeText(this, R.string.cooking_is_over, Toast.LENGTH_SHORT).show();
+        }
+        else if(mVideoNumber == 0){
+            Toast.makeText(this, R.string.you_better_see_next_step, Toast.LENGTH_SHORT).show();
         }
         else{
             if(v.getId() == mButtonPreviousStep.getId()){
