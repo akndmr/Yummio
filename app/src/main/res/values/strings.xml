@@ -10,4 +10,8 @@
     <string name="cooking_is_over">Cooking is over!</string>
     <string name="you_will_ingredients_of_latest_recipe_you_open_here">You will ingredients of latest recipe you open here</string>
     <string name="you_better_see_next_step">You better see next step!</string>
+    <string name="close_button_x">Close button X</string>
+    <string name="no_internet_connection">Ooops! Couldn\'t get the recipes! Please, check your connection!</string>
+    <string name="retry">Retry</string>
+    <string name="exit">Exit</string>
 </resources>

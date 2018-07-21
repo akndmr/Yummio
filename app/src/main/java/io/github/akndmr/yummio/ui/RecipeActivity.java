@@ -21,6 +21,8 @@ import io.github.akndmr.yummio.model.Recipe;
 import io.github.akndmr.yummio.rest.RecipeClient;
 import io.github.akndmr.yummio.rest.RecipeService;
 import io.github.akndmr.yummio.utils.ConstantsUtil;
+import io.github.akndmr.yummio.utils.DialogUtil;
+import io.github.akndmr.yummio.utils.NetworkUtil;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -70,8 +72,16 @@ public class RecipeActivity extends AppCompatActivity{
             mRecyclerViewRecipes.setAdapter(recipeAdapter);
         }
         else{
-            mRecipeService = new RecipeClient().mRecipeService;
-            new FetchRecipesAsync().execute();
+            if(NetworkUtil.isConnected(this)){
+                mRecipeService = new RecipeClient().mRecipeService;
+                new FetchRecipesAsync().execute();
+            }
+            else{
+                DialogUtil.showDialogWithButtons(this,
+                        R.drawable.yellow_cake,
+                        getResources().getString(R.string.no_internet_connection));
+            }
+
         }
 
     }
