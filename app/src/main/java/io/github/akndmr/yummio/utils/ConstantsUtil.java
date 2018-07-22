@@ -10,6 +10,7 @@ public class ConstantsUtil {
     public static final String JSON_RESULT_EXTRA = "json_result_extra";
     public static final String WIDGET_EXTRA = "widget_extra";
     public static final String RECIPE_INTENT_EXTRA = "recipe_intent_extra";
+    public static final String STEP_SINGLE = "step_single";
     public static final String STEP_ARRAYLIST = "step_arraylist";
     public static final String STEP_INTENT_EXTRA = "step_intent_extra";
     public static final String STEP_VIDEO_URI = "step_video_uri";

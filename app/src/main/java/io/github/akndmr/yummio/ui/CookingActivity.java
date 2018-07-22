@@ -87,14 +87,14 @@ public class CookingActivity extends AppCompatActivity  implements View.OnClickL
         }
 
         handleUiForDevice();
-        playVideo(mStepArrayList, mVideoNumber);
+        playVideo(mStepArrayList.get(mVideoNumber));
     }
 
     // Initialize fragment
-    public void playVideo(ArrayList<Step> stepArrayList, int videoNumber){
+    public void playVideo(Step step){
+        Step videoStep = mStepArrayList.get(mVideoNumber);
         VideoPlayerFragment videoPlayerFragment = new VideoPlayerFragment();
-        stepsBundle.putParcelableArrayList(ConstantsUtil.STEP_ARRAYLIST, stepArrayList);
-        stepsBundle.putInt(ConstantsUtil.STEP_NUMBER, videoNumber);
+        stepsBundle.putParcelable(ConstantsUtil.STEP_SINGLE, videoStep);
         videoPlayerFragment.setArguments(stepsBundle);
 
         FragmentManager fragmentManager = getSupportFragmentManager();
@@ -109,16 +109,6 @@ public class CookingActivity extends AppCompatActivity  implements View.OnClickL
         outState.putParcelableArrayList(STEP_LIST_STATE, mStepArrayList);
         outState.putString(STEP_LIST_JSON_STATE, mJsonResult);
         outState.putInt(STEP_NUMBER_STATE, mVideoNumber);
-    }
-
-    @Override
-    public void onBackPressed() {
-        super.onBackPressed();
-        if(isFromWidget){
-            Intent intent = new Intent(this, RecipeActivity.class);
-            startActivity(intent);
-            finish();
-        }
     }
 
     @Override
@@ -139,17 +129,18 @@ public class CookingActivity extends AppCompatActivity  implements View.OnClickL
         if(mVideoNumber == mStepArrayList.size()-1){
             Toast.makeText(this, R.string.cooking_is_over, Toast.LENGTH_SHORT).show();
         }
-        else if(mVideoNumber == 0){
-            Toast.makeText(this, R.string.you_better_see_next_step, Toast.LENGTH_SHORT).show();
-        }
         else{
             if(v.getId() == mButtonPreviousStep.getId()){
                 mVideoNumber--;
-                playVideo(mStepArrayList, mVideoNumber);
+                if(mVideoNumber < 0){
+                    Toast.makeText(this, R.string.you_better_see_next_step, Toast.LENGTH_SHORT).show();
+                }
+                else
+                    playVideo(mStepArrayList.get(mVideoNumber));
             }
             else if(v.getId() == mButtonNextStep.getId()){
                 mVideoNumber++;
-                playVideo(mStepArrayList, mVideoNumber);
+                playVideo(mStepArrayList.get(mVideoNumber));
             }
         }
     }
@@ -158,7 +149,7 @@ public class CookingActivity extends AppCompatActivity  implements View.OnClickL
     @Override
     public void onStepClick(int position) {
         mVideoNumber = position;
-        playVideo(mStepArrayList, position);
+        playVideo(mStepArrayList.get(position));
     }
 
     public void handleUiForDevice(){

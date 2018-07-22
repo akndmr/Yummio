@@ -15,8 +15,15 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.google.android.exoplayer2.C;
+import com.google.android.exoplayer2.DefaultLoadControl;
+import com.google.android.exoplayer2.ExoPlaybackException;
 import com.google.android.exoplayer2.ExoPlayerFactory;
+import com.google.android.exoplayer2.LoadControl;
+import com.google.android.exoplayer2.Player;
 import com.google.android.exoplayer2.SimpleExoPlayer;
+import com.google.android.exoplayer2.extractor.DefaultExtractorsFactory;
+import com.google.android.exoplayer2.source.BehindLiveWindowException;
 import com.google.android.exoplayer2.source.ExtractorMediaSource;
 import com.google.android.exoplayer2.source.MediaSource;
 import com.google.android.exoplayer2.trackselection.AdaptiveTrackSelection;
@@ -44,8 +51,10 @@ public class VideoPlayerFragment extends Fragment{
 
     public static final String STEP_LIST =  "step_list_fragment";
     public static final String STEP_NUMBER =  "step_number";
-    public static final String STEP_LIST_ARGS =  "step_list_fragment_args";
-    public static final String STEP_NUMBER_ARGS =  "step_number_args";
+    public static final String STEP_VIDEO_POSITION =  "step_video_position";
+    public static final String STEP_PLAY_WHEN_READY =  "step_play_when_ready";
+    public static final String STEP_PLAY_WINDOW_INDEX =  "step_play_window_index";
+    public static final String STEP_SINGLE =  "step_single";
 
     @BindView(R.id.tv_step_title)
     TextView mStepTitle;
@@ -68,10 +77,14 @@ public class VideoPlayerFragment extends Fragment{
 
 
     ArrayList<Step> mStepArrayList = new ArrayList<>();
+    Step mStep;
     Uri mVideoUri;
     String mVideoThumbnail, mVideoDescription;
     Bitmap mVideoThumbnailImage;
     int mVideoNumber;
+    boolean mShouldPlayWhenReady = true;
+    long mPlayerPosition;
+    int mWindowIndex;
 
 
     public VideoPlayerFragment() {
@@ -88,9 +101,12 @@ public class VideoPlayerFragment extends Fragment{
 
         // Check if there is any state saved
         if(savedInstanceState != null){
-            mStepArrayList = savedInstanceState.getParcelableArrayList(STEP_LIST);
-            mVideoNumber = savedInstanceState.getInt(STEP_NUMBER);
+            mStep = savedInstanceState.getParcelable(STEP_SINGLE);
+            mShouldPlayWhenReady = savedInstanceState.getBoolean(STEP_PLAY_WHEN_READY);
+            mPlayerPosition = savedInstanceState.getLong(STEP_VIDEO_POSITION);
+            mWindowIndex = savedInstanceState.getInt(STEP_PLAY_WINDOW_INDEX);
         }
+
 
 
         // If there is no saved state getArguments from CookingActivity
@@ -101,12 +117,11 @@ public class VideoPlayerFragment extends Fragment{
                mPlayerView.setVisibility(View.VISIBLE);
 
                // Get arguments
-               mStepArrayList = getArguments().getParcelableArrayList(ConstantsUtil.STEP_ARRAYLIST);
-               mVideoNumber = getArguments().getInt(ConstantsUtil.STEP_NUMBER);
+               mStep = getArguments().getParcelable(ConstantsUtil.STEP_SINGLE);
 
-               if(mStepArrayList.get(mVideoNumber).getVideoURL().equals("")){
-                   if(mStepArrayList.get(mVideoNumber).getThumbnailURL().equals(""))
-                   {
+
+               if(mStep.getVideoURL().equals("")){
+                   if(mStep.getThumbnailURL().equals("")){
                        // If no video or thumbnail, use placeholder image
                        mPlayerView.setUseArtwork(true);
                        mImageViewPlaceholder.setVisibility(View.VISIBLE);
@@ -115,18 +130,16 @@ public class VideoPlayerFragment extends Fragment{
                    else{
                        mImageViewPlaceholder.setVisibility(View.GONE);
                        mPlayerView.setVisibility(View.VISIBLE);
-                       mVideoThumbnail = mStepArrayList.get(mVideoNumber).getThumbnailURL();
+                       mVideoThumbnail = mStep.getThumbnailURL();
                        mVideoThumbnailImage = ThumbnailUtils.createVideoThumbnail(mVideoThumbnail, MediaStore.Video.Thumbnails.MICRO_KIND);
                        mPlayerView.setUseArtwork(true);
                        mPlayerView.setDefaultArtwork(mVideoThumbnailImage);
                    }
                }
                else{
-                   mVideoUri = Uri.parse(mStepArrayList.get(mVideoNumber).getVideoURL());
+                   mVideoUri = Uri.parse(mStep.getVideoURL());
                }
            }
-           // Start player
-           initializeVideoPlayer(mVideoUri);
        }
         return root;
     }
@@ -134,45 +147,49 @@ public class VideoPlayerFragment extends Fragment{
 
     public void initializeVideoPlayer(Uri videoUri){
 
-        mStepDescription.setText(mStepArrayList.get(mVideoNumber).getDescription());
-        mStepTitle.setText(mStepArrayList.get(mVideoNumber).getShortDescription());
+       // mStepDescription.setText(mStepArrayList.get(mVideoNumber).getDescription());
+       // mStepTitle.setText(mStepArrayList.get(mVideoNumber).getShortDescription());
+
+        mStepDescription.setText(mStep.getDescription());
+        mStepTitle.setText(mStep.getShortDescription());
+
 
         if(mSimpleExoPlayer == null){
-            // 1. Create a default TrackSelector
-            bandwidthMeter = new DefaultBandwidthMeter();
-            videoTrackSelectionFactory =
-                    new AdaptiveTrackSelection.Factory(bandwidthMeter);
-            trackSelector =
-                    new DefaultTrackSelector(videoTrackSelectionFactory);
 
-            // 2. Create the player
+            TrackSelector trackSelector = new DefaultTrackSelector();
+            LoadControl loadControl = new DefaultLoadControl();
             mSimpleExoPlayer =
-                    ExoPlayerFactory.newSimpleInstance(getContext(), trackSelector);
+                    ExoPlayerFactory.newSimpleInstance(getContext(), trackSelector, loadControl);
 
             // Bind the player to the view.
             mPlayerView.setPlayer(mSimpleExoPlayer);
 
-            // Produces DataSource instances through which media data is loaded.
-            dataSourceFactory = new DefaultDataSourceFactory(getContext(),
-                    Util.getUserAgent(getContext(), "Yummio"), bandwidthMeter);
+            // Prepare the MediaSource.
+            String userAgent = Util.getUserAgent(getActivity().getBaseContext(), getString(R.string.app_name));
+            MediaSource mediaSource = new ExtractorMediaSource(videoUri,
+                    new DefaultDataSourceFactory(getActivity(), userAgent),
+                    new DefaultExtractorsFactory(),
+                    null,
+                    null);
 
-            // This is the MediaSource representing the media to be played.
-            videoSource = new ExtractorMediaSource.Factory(dataSourceFactory)
-                    .createMediaSource(videoUri);
             // Prepare the player with the source.
-            mSimpleExoPlayer.prepare(videoSource);
+            mSimpleExoPlayer.prepare(mediaSource);
+
+            if (mPlayerPosition != C.TIME_UNSET) {
+                mSimpleExoPlayer.seekTo(mPlayerPosition);
+            }
+            mSimpleExoPlayer.setPlayWhenReady(mShouldPlayWhenReady);
+
         }
     }
 
     // Release player
     private void releasePlayer() {
         if (mSimpleExoPlayer != null) {
+            updateStartPosition();
             mSimpleExoPlayer.stop();
             mSimpleExoPlayer.release();
             mSimpleExoPlayer = null;
-            dataSourceFactory = null;
-            videoSource = null;
-            trackSelector = null;
         }
     }
 
@@ -190,29 +207,31 @@ public class VideoPlayerFragment extends Fragment{
         if (Util.SDK_INT <= 23 || mSimpleExoPlayer == null) {
             initializeVideoPlayer(mVideoUri);
         }
+        if(mSimpleExoPlayer != null){
+            mSimpleExoPlayer.seekTo(mPlayerPosition);
+            mSimpleExoPlayer.setPlayWhenReady(mShouldPlayWhenReady);
+        }
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        if (Util.SDK_INT <= 23) {
-            releasePlayer();
+        if(mSimpleExoPlayer != null){
+            mPlayerPosition = mSimpleExoPlayer.getCurrentPosition();
+            mShouldPlayWhenReady = mSimpleExoPlayer.getPlayWhenReady();
+            if (Util.SDK_INT <= 23) {
+                releasePlayer();
+            }
         }
     }
 
     @Override
     public void onStop() {
         super.onStop();
-        if (Util.SDK_INT > 23) {
-            releasePlayer();
-        }
-    }
-
-    @Override
-    public void onDetach() {
-        super.onDetach();
-        if (mSimpleExoPlayer!=null) {
-           releasePlayer();
+        if(mSimpleExoPlayer != null){
+            if (Util.SDK_INT > 23) {
+                releasePlayer();
+            }
         }
     }
 
@@ -225,7 +244,34 @@ public class VideoPlayerFragment extends Fragment{
     @Override
     public void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putParcelableArrayList(STEP_LIST, mStepArrayList);
-        outState.putInt(STEP_NUMBER, mVideoNumber);
+        updateStartPosition();
+        outState.putParcelable(STEP_SINGLE, mStep);
+        outState.putLong(STEP_VIDEO_POSITION, mPlayerPosition);
+        outState.putBoolean(STEP_PLAY_WHEN_READY, mShouldPlayWhenReady);
     }
+
+    @Override
+    public void onViewStateRestored(@Nullable Bundle savedInstanceState) {
+        super.onViewStateRestored(savedInstanceState);
+        if(savedInstanceState != null){
+            mStep = savedInstanceState.getParcelable(STEP_SINGLE);
+            mPlayerPosition = savedInstanceState.getLong(STEP_VIDEO_POSITION);
+            mShouldPlayWhenReady = savedInstanceState.getBoolean(STEP_PLAY_WHEN_READY);
+        }
+    }
+
+    private void updateStartPosition() {
+        if (mSimpleExoPlayer != null) {
+            mShouldPlayWhenReady = mSimpleExoPlayer.getPlayWhenReady();
+            mWindowIndex = mSimpleExoPlayer.getCurrentWindowIndex();
+            mPlayerPosition = Math.max(0, mSimpleExoPlayer.getCurrentPosition());
+        }
+    }
+
+    private void clearStartPosition() {
+        mShouldPlayWhenReady = true;
+        mWindowIndex = C.INDEX_UNSET;
+        mPlayerPosition = C.TIME_UNSET;
+    }
+
 }
