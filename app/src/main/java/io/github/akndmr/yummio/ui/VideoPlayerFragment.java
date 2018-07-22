@@ -69,19 +69,11 @@ public class VideoPlayerFragment extends Fragment{
     ImageView mImageViewPlaceholder;
 
     SimpleExoPlayer mSimpleExoPlayer;
-    DefaultBandwidthMeter bandwidthMeter;
-    TrackSelection.Factory videoTrackSelectionFactory;
-    TrackSelector trackSelector;
-    DataSource.Factory dataSourceFactory;
-    MediaSource videoSource;
 
-
-    ArrayList<Step> mStepArrayList = new ArrayList<>();
     Step mStep;
     Uri mVideoUri;
-    String mVideoThumbnail, mVideoDescription;
+    String mVideoThumbnail;
     Bitmap mVideoThumbnailImage;
-    int mVideoNumber;
     boolean mShouldPlayWhenReady = true;
     long mPlayerPosition;
     int mWindowIndex;
@@ -146,9 +138,6 @@ public class VideoPlayerFragment extends Fragment{
 
 
     public void initializeVideoPlayer(Uri videoUri){
-
-       // mStepDescription.setText(mStepArrayList.get(mVideoNumber).getDescription());
-       // mStepTitle.setText(mStepArrayList.get(mVideoNumber).getShortDescription());
 
         mStepDescription.setText(mStep.getDescription());
         mStepTitle.setText(mStep.getShortDescription());
@@ -217,8 +206,7 @@ public class VideoPlayerFragment extends Fragment{
     public void onPause() {
         super.onPause();
         if(mSimpleExoPlayer != null){
-            mPlayerPosition = mSimpleExoPlayer.getCurrentPosition();
-            mShouldPlayWhenReady = mSimpleExoPlayer.getPlayWhenReady();
+            updateStartPosition();
             if (Util.SDK_INT <= 23) {
                 releasePlayer();
             }
@@ -267,11 +255,4 @@ public class VideoPlayerFragment extends Fragment{
             mPlayerPosition = Math.max(0, mSimpleExoPlayer.getCurrentPosition());
         }
     }
-
-    private void clearStartPosition() {
-        mShouldPlayWhenReady = true;
-        mWindowIndex = C.INDEX_UNSET;
-        mPlayerPosition = C.TIME_UNSET;
-    }
-
 }
