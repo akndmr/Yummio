@@ -17,26 +17,15 @@ import android.widget.TextView;
 
 import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.DefaultLoadControl;
-import com.google.android.exoplayer2.ExoPlaybackException;
 import com.google.android.exoplayer2.ExoPlayerFactory;
-import com.google.android.exoplayer2.LoadControl;
-import com.google.android.exoplayer2.Player;
 import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.google.android.exoplayer2.extractor.DefaultExtractorsFactory;
-import com.google.android.exoplayer2.source.BehindLiveWindowException;
 import com.google.android.exoplayer2.source.ExtractorMediaSource;
 import com.google.android.exoplayer2.source.MediaSource;
-import com.google.android.exoplayer2.trackselection.AdaptiveTrackSelection;
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
-import com.google.android.exoplayer2.trackselection.TrackSelection;
-import com.google.android.exoplayer2.trackselection.TrackSelector;
-import com.google.android.exoplayer2.ui.PlayerView;
-import com.google.android.exoplayer2.upstream.DataSource;
-import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
+import com.google.android.exoplayer2.ui.SimpleExoPlayerView;
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
 import com.google.android.exoplayer2.util.Util;
-
-import java.util.ArrayList;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -49,18 +38,18 @@ import io.github.akndmr.yummio.utils.ConstantsUtil;
  */
 public class VideoPlayerFragment extends Fragment{
 
-    public static final String STEP_LIST =  "step_list_fragment";
-    public static final String STEP_NUMBER =  "step_number";
+    public static final String STEP_URI =  "step_uri";
     public static final String STEP_VIDEO_POSITION =  "step_video_position";
     public static final String STEP_PLAY_WHEN_READY =  "step_play_when_ready";
     public static final String STEP_PLAY_WINDOW_INDEX =  "step_play_window_index";
     public static final String STEP_SINGLE =  "step_single";
 
+
     @BindView(R.id.tv_step_title)
     TextView mStepTitle;
 
     @BindView(R.id.player_view)
-    PlayerView mPlayerView;
+    SimpleExoPlayerView mPlayerView;
 
     @BindView(R.id.tv_step_description)
     TextView mStepDescription;
@@ -84,12 +73,17 @@ public class VideoPlayerFragment extends Fragment{
     }
 
     @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+    }
+
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View root = inflater.inflate(R.layout.fragment_video_player, container, false);
-        ButterKnife.bind(this, root);
 
+        ButterKnife.bind(this, root);
 
         // Check if there is any state saved
         if(savedInstanceState != null){
@@ -97,10 +91,8 @@ public class VideoPlayerFragment extends Fragment{
             mShouldPlayWhenReady = savedInstanceState.getBoolean(STEP_PLAY_WHEN_READY);
             mPlayerPosition = savedInstanceState.getLong(STEP_VIDEO_POSITION);
             mWindowIndex = savedInstanceState.getInt(STEP_PLAY_WINDOW_INDEX);
+            mVideoUri = Uri.parse(savedInstanceState.getString(STEP_URI));
         }
-
-
-
         // If there is no saved state getArguments from CookingActivity
         else{
            if(getArguments() != null){
@@ -111,8 +103,9 @@ public class VideoPlayerFragment extends Fragment{
                // Get arguments
                mStep = getArguments().getParcelable(ConstantsUtil.STEP_SINGLE);
 
-
+               // If has no video
                if(mStep.getVideoURL().equals("")){
+                   // Check thumbnail
                    if(mStep.getThumbnailURL().equals("")){
                        // If no video or thumbnail, use placeholder image
                        mPlayerView.setUseArtwork(true);
@@ -136,39 +129,35 @@ public class VideoPlayerFragment extends Fragment{
         return root;
     }
 
-
+    // Initialize exoplayer
     public void initializeVideoPlayer(Uri videoUri){
 
         mStepDescription.setText(mStep.getDescription());
         mStepTitle.setText(mStep.getShortDescription());
 
-
         if(mSimpleExoPlayer == null){
 
-            TrackSelector trackSelector = new DefaultTrackSelector();
-            LoadControl loadControl = new DefaultLoadControl();
-            mSimpleExoPlayer =
-                    ExoPlayerFactory.newSimpleInstance(getContext(), trackSelector, loadControl);
+            mSimpleExoPlayer=  ExoPlayerFactory.newSimpleInstance(getActivity(),
+                    new DefaultTrackSelector(),
+                    new DefaultLoadControl());
 
             // Bind the player to the view.
             mPlayerView.setPlayer(mSimpleExoPlayer);
 
             // Prepare the MediaSource.
-            String userAgent = Util.getUserAgent(getActivity().getBaseContext(), getString(R.string.app_name));
+            String userAgent = Util.getUserAgent(getActivity(), getString(R.string.app_name));
             MediaSource mediaSource = new ExtractorMediaSource(videoUri,
                     new DefaultDataSourceFactory(getActivity(), userAgent),
                     new DefaultExtractorsFactory(),
                     null,
                     null);
 
-            // Prepare the player with the source.
-            mSimpleExoPlayer.prepare(mediaSource);
-
             if (mPlayerPosition != C.TIME_UNSET) {
                 mSimpleExoPlayer.seekTo(mPlayerPosition);
             }
+            // Prepare the player with the source.
+            mSimpleExoPlayer.prepare(mediaSource);
             mSimpleExoPlayer.setPlayWhenReady(mShouldPlayWhenReady);
-
         }
     }
 
@@ -197,8 +186,8 @@ public class VideoPlayerFragment extends Fragment{
             initializeVideoPlayer(mVideoUri);
         }
         if(mSimpleExoPlayer != null){
-            mSimpleExoPlayer.seekTo(mPlayerPosition);
             mSimpleExoPlayer.setPlayWhenReady(mShouldPlayWhenReady);
+            mSimpleExoPlayer.seekTo(mPlayerPosition);
         }
     }
 
@@ -217,6 +206,7 @@ public class VideoPlayerFragment extends Fragment{
     public void onStop() {
         super.onStop();
         if(mSimpleExoPlayer != null){
+            updateStartPosition();
             if (Util.SDK_INT > 23) {
                 releasePlayer();
             }
@@ -224,35 +214,21 @@ public class VideoPlayerFragment extends Fragment{
     }
 
     @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-        releasePlayer();
-    }
-
-    @Override
     public void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
         updateStartPosition();
+        outState.putString(STEP_URI, mStep.getVideoURL());
         outState.putParcelable(STEP_SINGLE, mStep);
         outState.putLong(STEP_VIDEO_POSITION, mPlayerPosition);
         outState.putBoolean(STEP_PLAY_WHEN_READY, mShouldPlayWhenReady);
-    }
-
-    @Override
-    public void onViewStateRestored(@Nullable Bundle savedInstanceState) {
-        super.onViewStateRestored(savedInstanceState);
-        if(savedInstanceState != null){
-            mStep = savedInstanceState.getParcelable(STEP_SINGLE);
-            mPlayerPosition = savedInstanceState.getLong(STEP_VIDEO_POSITION);
-            mShouldPlayWhenReady = savedInstanceState.getBoolean(STEP_PLAY_WHEN_READY);
-        }
     }
 
     private void updateStartPosition() {
         if (mSimpleExoPlayer != null) {
             mShouldPlayWhenReady = mSimpleExoPlayer.getPlayWhenReady();
             mWindowIndex = mSimpleExoPlayer.getCurrentWindowIndex();
-            mPlayerPosition = Math.max(0, mSimpleExoPlayer.getCurrentPosition());
+            mPlayerPosition = mSimpleExoPlayer.getCurrentPosition();
         }
     }
+
 }

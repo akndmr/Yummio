@@ -2,7 +2,6 @@ package io.github.akndmr.yummio.ui;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.os.Build;
 import android.support.v4.app.NavUtils;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -26,7 +25,6 @@ import io.github.akndmr.yummio.model.Ingredient;
 import io.github.akndmr.yummio.model.Recipe;
 import io.github.akndmr.yummio.model.Step;
 import io.github.akndmr.yummio.utils.ConstantsUtil;
-import io.github.akndmr.yummio.widget.YummioWidgetService;
 
 public class RecipeDetailsActivity extends AppCompatActivity {
 

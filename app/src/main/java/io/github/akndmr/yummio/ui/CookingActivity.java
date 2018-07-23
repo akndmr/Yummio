@@ -47,7 +47,6 @@ public class CookingActivity extends AppCompatActivity  implements View.OnClickL
 
     ArrayList<Step> mStepArrayList = new ArrayList<>();
     String mJsonResult;
-    Bundle stepsBundle = new Bundle();
     boolean isFromWidget;
     StepNumberAdapter mStepNumberAdapter;
     LinearLayoutManager mLinearLayoutManager;
@@ -56,7 +55,6 @@ public class CookingActivity extends AppCompatActivity  implements View.OnClickL
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_cooking);
-        ButterKnife.bind(this);
 
         // Up navigation
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -69,37 +67,56 @@ public class CookingActivity extends AppCompatActivity  implements View.OnClickL
             isTablet = false;
         }
 
-        if(savedInstanceState != null){
-            mStepArrayList = savedInstanceState.getParcelableArrayList(STEP_LIST_STATE);
-            mJsonResult = savedInstanceState.getString(STEP_LIST_JSON_STATE);
-            mVideoNumber = savedInstanceState.getInt(STEP_NUMBER_STATE);
+        Intent intent = getIntent();
+        if (intent != null) {
+            if (intent.hasExtra(ConstantsUtil.STEP_INTENT_EXTRA)) {
+                mStepArrayList = getIntent().getParcelableArrayListExtra(ConstantsUtil.STEP_INTENT_EXTRA);
+            }
+            if (intent.hasExtra(ConstantsUtil.JSON_RESULT_EXTRA)) {
+                mJsonResult = getIntent().getStringExtra(ConstantsUtil.JSON_RESULT_EXTRA);
+            }
+            if(intent.getStringExtra(ConstantsUtil.WIDGET_EXTRA) != null){
+                isFromWidget = true;
+            }
+            else{
+                isFromWidget = false;
+            }
         }
-        else{
-            mStepArrayList = getIntent().getParcelableArrayListExtra(ConstantsUtil.STEP_INTENT_EXTRA);
-            mJsonResult = getIntent().getStringExtra(ConstantsUtil.JSON_RESULT_EXTRA);
+        // If there is no saved state, instantiate fragment
+        if(savedInstanceState == null){
+            playVideo(mStepArrayList.get(mVideoNumber));
         }
 
-        if(getIntent().getStringExtra(ConstantsUtil.WIDGET_EXTRA) != null){
-            isFromWidget = true;
-        }
-        else{
-            isFromWidget = false;
-        }
+        ButterKnife.bind(this);
 
         handleUiForDevice();
-        playVideo(mStepArrayList.get(mVideoNumber));
     }
 
     // Initialize fragment
     public void playVideo(Step step){
-        Step videoStep = mStepArrayList.get(mVideoNumber);
         VideoPlayerFragment videoPlayerFragment = new VideoPlayerFragment();
-        stepsBundle.putParcelable(ConstantsUtil.STEP_SINGLE, videoStep);
+        Bundle stepsBundle = new Bundle();
+        stepsBundle.putParcelable(ConstantsUtil.STEP_SINGLE, step);
+        videoPlayerFragment.setArguments(stepsBundle);
+
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        fragmentManager.beginTransaction()
+                .add(R.id.fl_player_container, videoPlayerFragment)
+                .addToBackStack(null)
+                .commit();
+    }
+
+    // Initialize fragment
+    public void playVideoReplace(Step step){
+        VideoPlayerFragment videoPlayerFragment = new VideoPlayerFragment();
+        Bundle stepsBundle = new Bundle();
+        stepsBundle.putParcelable(ConstantsUtil.STEP_SINGLE, step);
         videoPlayerFragment.setArguments(stepsBundle);
 
         FragmentManager fragmentManager = getSupportFragmentManager();
         fragmentManager.beginTransaction()
                 .replace(R.id.fl_player_container, videoPlayerFragment)
+                .addToBackStack(null)
                 .commit();
     }
 
@@ -136,11 +153,11 @@ public class CookingActivity extends AppCompatActivity  implements View.OnClickL
                     Toast.makeText(this, R.string.you_better_see_next_step, Toast.LENGTH_SHORT).show();
                 }
                 else
-                    playVideo(mStepArrayList.get(mVideoNumber));
+                    playVideoReplace(mStepArrayList.get(mVideoNumber));
             }
             else if(v.getId() == mButtonNextStep.getId()){
                 mVideoNumber++;
-                playVideo(mStepArrayList.get(mVideoNumber));
+                playVideoReplace(mStepArrayList.get(mVideoNumber));
             }
         }
     }
@@ -149,7 +166,7 @@ public class CookingActivity extends AppCompatActivity  implements View.OnClickL
     @Override
     public void onStepClick(int position) {
         mVideoNumber = position;
-        playVideo(mStepArrayList.get(position));
+        playVideoReplace(mStepArrayList.get(position));
     }
 
     public void handleUiForDevice(){
@@ -163,6 +180,16 @@ public class CookingActivity extends AppCompatActivity  implements View.OnClickL
             mLinearLayoutManager = new LinearLayoutManager(this);
             mRecyclerViewSteps.setLayoutManager(mLinearLayoutManager);
             mRecyclerViewSteps.setAdapter(mStepNumberAdapter);
+        }
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        if (savedInstanceState != null) {
+            mStepArrayList = savedInstanceState.getParcelableArrayList(STEP_LIST_STATE);
+            mJsonResult = savedInstanceState.getString(STEP_LIST_JSON_STATE);
+            mVideoNumber = savedInstanceState.getInt(STEP_NUMBER_STATE);
         }
     }
 

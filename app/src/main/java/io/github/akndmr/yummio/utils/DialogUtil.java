@@ -15,8 +15,6 @@ import android.widget.TextView;
 import com.squareup.picasso.Picasso;
 
 import io.github.akndmr.yummio.R;
-import io.github.akndmr.yummio.model.Recipe;
-import io.github.akndmr.yummio.ui.RecipeActivity;
 
 /**
  * Created by AKIN on 25.02.2018.

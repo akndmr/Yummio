@@ -1,12 +1,6 @@
 package io.github.akndmr.yummio.ui;
 
-import android.app.Notification;
-import android.app.NotificationChannel;
-import android.app.NotificationManager;
-import android.content.Intent;
 import android.os.AsyncTask;
-import android.os.Build;
-import android.support.v4.app.NotificationCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
@@ -25,7 +19,6 @@ import io.github.akndmr.yummio.adapter.RecipeAdapter;
 import io.github.akndmr.yummio.model.Recipe;
 import io.github.akndmr.yummio.rest.RecipeClient;
 import io.github.akndmr.yummio.rest.RecipeService;
-import io.github.akndmr.yummio.utils.ConstantsUtil;
 import io.github.akndmr.yummio.utils.DialogUtil;
 import io.github.akndmr.yummio.utils.NetworkUtil;
 import retrofit2.Call;
